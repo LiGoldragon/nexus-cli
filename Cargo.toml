@@ -1,0 +1,17 @@
+[package]
+name         = "nexus-cli"
+version      = "0.1.0"
+edition      = "2024"
+rust-version = "1.85"
+license      = "MIT OR Apache-2.0"
+repository   = "https://github.com/LiGoldragon/nexus-cli"
+description  = "Thin CLI client for the nexus daemon"
+
+[[bin]]
+name = "nexus"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+thiserror = "2"

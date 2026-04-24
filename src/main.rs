@@ -3,6 +3,10 @@
 //! Accepts a nexus message on stdin or via command-line argument,
 //! sends it to the daemon, prints the response.
 
-fn main() -> anyhow::Result<()> {
+mod error;
+
+use error::Result;
+
+fn main() -> Result<()> {
     Ok(())
 }

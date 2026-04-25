@@ -22,13 +22,13 @@ Owns:
 
 Does not own:
 - Parsing nexus text (nexus does that, via nota-serde-core).
-- Validation (criomed does that).
-- Sema state (criomed owns it).
+- Validation (criome does that).
+- Sema state (criome owns it).
 
 ## Edit UX
 
 The shell pattern is **request-composing**: nexus text in,
-criomed-validated records out. Five write verbs (`Assert`,
+criome-validated records out. Five write verbs (`Assert`,
 `Mutate`, `Retract`, `Patch`, `TxnBatch`) and read verbs
 (`Query`, `Subscribe`, `Validate`).
 
@@ -48,7 +48,7 @@ in a batch, send. Mechanism stays transparent.
 
 ## Diagnostics as iteration substrate
 
-When validation fails, criomed returns a `Diagnostic` (signal-
+When validation fails, criome returns a `Diagnostic` (signal-
 side `Reply::Rejected`). For LLM iteration, the Diagnostic
 record carries:
 
@@ -88,5 +88,5 @@ auto-applied by the LLM front-end.
 
 ## Status
 
-**Skeleton-as-design.** Body fills land alongside criomed
+**Skeleton-as-design.** Body fills land alongside criome
 scaffolding (per mentci/reports/076 §4).

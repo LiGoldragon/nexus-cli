@@ -89,4 +89,4 @@ auto-applied by the LLM front-end.
 ## Status
 
 **Skeleton-as-design.** Body fills land alongside criome
-scaffolding (per mentci/reports/076 §4).
+scaffolding.

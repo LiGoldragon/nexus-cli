@@ -84,9 +84,9 @@ auto-applied by the LLM front-end.
 - client-msg envelope (the wire format to nexusd):
   [nexusd::client_msg](https://github.com/LiGoldragon/nexusd/tree/main/src/client_msg)
 - Project-wide architecture:
-  [mentci-next/docs/architecture.md](https://github.com/LiGoldragon/mentci-next/blob/main/docs/architecture.md)
+  [criome/ARCHITECTURE.md](https://github.com/LiGoldragon/criome/blob/main/ARCHITECTURE.md)
 
 ## Status
 
 **Skeleton-as-design.** Body fills land alongside criomed
-scaffolding (per mentci-next/reports/076 §4).
+scaffolding (per mentci/reports/076 §4).

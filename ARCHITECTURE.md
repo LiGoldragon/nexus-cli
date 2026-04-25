@@ -1,13 +1,13 @@
 # ARCHITECTURE — nexus-cli
 
-The thin text client. Pipes nexus text into nexusd over UDS;
+The thin text client. Pipes nexus text into nexus over UDS;
 serialises replies back to text for the terminal. Stateless —
-nexusd holds the connection state.
+nexus holds the connection state.
 
 ## Role
 
-nexus-cli is one client of nexusd; future clients include editor
-LSPs, agent harnesses, scripts. All speak [client-msg](https://github.com/LiGoldragon/nexusd/tree/main/src/client_msg)
+nexus-cli is one client of nexus; future clients include editor
+LSPs, agent harnesses, scripts. All speak [client-msg](https://github.com/LiGoldragon/nexus/tree/main/src/client_msg)
 (rkyv envelope around nexus text payloads + heartbeat / cancel /
 resume control verbs). nexus-cli is the *reference* client.
 
@@ -21,7 +21,7 @@ Owns:
 - Cancel / resume from a fallback file when the socket flaps.
 
 Does not own:
-- Parsing nexus text (nexusd does that, via nota-serde-core).
+- Parsing nexus text (nexus does that, via nota-serde-core).
 - Validation (criomed does that).
 - Sema state (criomed owns it).
 
@@ -67,7 +67,7 @@ auto-applied by the LLM front-end.
 
 - **Stateless.** Each invocation builds one client-msg, sends,
   reads replies until done, exits. State that survives — like
-  pending work — lives in nexusd, retrievable via `Resume`.
+  pending work — lives in nexus, retrievable via `Resume`.
 - **Text is text.** nexus-cli does not parse nexus; it just
   shuttles bytes.
 
@@ -81,8 +81,8 @@ auto-applied by the LLM front-end.
 ## Cross-cutting context
 
 - nexus language: [github.com/LiGoldragon/nexus](https://github.com/LiGoldragon/nexus)
-- client-msg envelope (the wire format to nexusd):
-  [nexusd::client_msg](https://github.com/LiGoldragon/nexusd/tree/main/src/client_msg)
+- client-msg envelope (the wire format to nexus):
+  [nexus::client_msg](https://github.com/LiGoldragon/nexus/tree/main/src/client_msg)
 - Project-wide architecture:
   [criome/ARCHITECTURE.md](https://github.com/LiGoldragon/criome/blob/main/ARCHITECTURE.md)
 

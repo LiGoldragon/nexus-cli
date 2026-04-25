@@ -1,4 +1,4 @@
-//! nexus — thin CLI client for nexusd.
+//! nexus — thin CLI client for nexus.
 //!
 //! Accepts a nexus message on stdin or via command-line argument,
 //! sends it to the daemon, prints the response.

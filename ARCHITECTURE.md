@@ -28,10 +28,11 @@ Owns:
 Does not own:
 
 - Parsing nexus text. The daemon does that, via
-  [nota-serde-core](https://github.com/LiGoldragon/nota-serde-core)
-  (for the typed verbs) and the daemon's own
-  [`QueryParser`](https://github.com/LiGoldragon/nexus/blob/main/src/parse.rs)
-  (for query containers).
+  [nota-codec](https://github.com/LiGoldragon/nota-codec)'s
+  `Decoder::nexus` plus the per-kind
+  [nota-derive](https://github.com/LiGoldragon/nota-derive)
+  derives (`NotaRecord` / `NotaEnum` / `NotaTransparent` /
+  `NotaTryTransparent` / `NexusPattern` / `NexusVerb`).
 - Validation. criome does that.
 - Sema state. criome owns it.
 - Any wire framing. The CLI ↔ daemon leg is plain text;

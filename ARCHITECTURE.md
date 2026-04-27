@@ -1,58 +1,73 @@
 # ARCHITECTURE — nexus-cli
 
-The thin text client. Pipes nexus text into nexus over UDS;
-serialises replies back to text for the terminal. Stateless —
-nexus holds the connection state.
+The thin text client for the [nexus](https://github.com/LiGoldragon/nexus)
+daemon. Reads nexus text from stdin or a file, writes it to the
+daemon over UDS at `/tmp/nexus.sock`, prints the daemon's reply
+text. Stateless — the daemon (and ultimately criome) holds all
+durable state.
 
 ## Role
 
-nexus-cli is one client of nexus; future clients include editor
-LSPs, agent harnesses, scripts. All speak [client-msg](https://github.com/LiGoldragon/nexus/tree/main/src/client_msg)
-(rkyv envelope around nexus text payloads + heartbeat / cancel /
-resume control verbs). nexus-cli is the *reference* client.
+nexus-cli is one client of the nexus daemon; future clients
+include editor LSPs, agent harnesses, scripts. **All clients
+exchange pure nexus text** with the daemon over its UDS socket
+— no envelope, no rkyv, no framing format. The text grammar
+self-delimits on matched parens.
+
+nexus-cli is the *reference* client: the simplest possible
+shape of a text-in-text-out shuttle.
 
 ## Boundaries
 
 Owns:
-- Reading nexus text from stdin / arguments.
-- Wrapping it in a `client_msg::Send` with optional fallback path.
-- Writing the resulting text reply to stdout.
-- Heartbeat probes for long-running operations.
-- Cancel / resume from a fallback file when the socket flaps.
+
+- Reading nexus text from stdin or a file argument.
+- Connecting to `/tmp/nexus.sock` and writing the text bytes.
+- Reading the reply bytes back and printing them to stdout.
 
 Does not own:
-- Parsing nexus text (nexus does that, via nota-serde-core).
-- Validation (criome does that).
-- Sema state (criome owns it).
 
-## Edit UX
+- Parsing nexus text. The daemon does that, via
+  [nota-serde-core](https://github.com/LiGoldragon/nota-serde-core)
+  (for the typed verbs) and the daemon's own
+  [`QueryParser`](https://github.com/LiGoldragon/nexus/blob/main/src/parse.rs)
+  (for query containers).
+- Validation. criome does that.
+- Sema state. criome owns it.
+- Any wire framing. The CLI ↔ daemon leg is plain text;
+  the daemon ↔ criome leg is length-prefixed rkyv (signal),
+  but that's the daemon's concern.
 
-The shell pattern is **request-composing**: nexus text in,
-criome-validated records out. Five write verbs (`Assert`,
-`Mutate`, `Retract`, `Patch`, `TxnBatch`) and read verbs
-(`Query`, `Subscribe`, `Validate`).
+## Edit surface
 
-Two complementary read surfaces:
+Per the [nexus grammar](https://github.com/LiGoldragon/nexus/blob/main/spec/grammar.md),
+the verbs the daemon accepts (and therefore the CLI can shuttle)
+are:
 
-- **rsc-projected `.rs`** — for "what does this code do?"
-  questions. Compile-friendly. Same view rustc/cargo see.
-- **structured tree-view** — for "how is this structured in
-  sema?" questions. Records, slots, change-log, derivations.
+| Sigil + delimiter      | Verb         |
+|------------------------|--------------|
+| `(R …)`                | Assert       |
+| `~(R …)`               | Mutate       |
+| `!(R …)` / `!slot`     | Retract      |
+| `?(...)`               | Validate     |
+| `(\| pat \|)`          | Query        |
+| `*(\| pat \|)`         | Subscribe    |
+| `[\| op1 op2 … \|]`    | Atomic batch |
 
-Both are first-class. Pick by the task: text projection for
-flow, tree-view for structural manipulation.
-
-Atomic batches use the `{|| ... ||}` syntax. Pattern-driven
-mutations are client-side: query first, build N mutates, wrap
-in a batch, send. Mechanism stays transparent.
+Atomic batches use the `[\| \|]` form (square-bracket-pipe).
+Pattern-driven mutations expand at the daemon: the user writes
+`~(\| pat \|) (NewRecord …)` once; the daemon expands to one
+MutateOp per match inside an AtomicBatch.
 
 ## Diagnostics as iteration substrate
 
-When validation fails, criome returns a `Diagnostic` (signal-
-side `Reply::Rejected`). For LLM iteration, the Diagnostic
-record carries:
+When validation fails, criome returns an `OutcomeMessage::
+Diagnostic(Diagnostic)` (per [signal/src/reply.rs](https://github.com/LiGoldragon/signal/blob/main/src/reply.rs))
+which the daemon renders as a `(Diagnostic …)` record in the
+reply text. The Diagnostic carries:
 
 - `code` (`E0001`–`E9999` by failure class)
+- `level` (Error / Warning / Info)
 - `primary_site` — `Slot` reference, source span, or
   op-in-batch index
 - `suggestions` with applicability flags
@@ -61,32 +76,42 @@ record carries:
 
 The iteration loop: edit → reject → diagnostic → fix → re-send.
 Diagnostics with `MachineApplicable` suggestions can be
-auto-applied by the LLM front-end.
+auto-applied by an LLM front-end.
 
 ## Invariants
 
-- **Stateless.** Each invocation builds one client-msg, sends,
-  reads replies until done, exits. State that survives — like
-  pending work — lives in nexus, retrievable via `Resume`.
+- **Stateless.** Each invocation opens a connection, writes
+  text, reads response text, exits. No fallback files, no
+  resume-after-disconnect; durable state lives in criome's
+  sema and is retrieved by issuing a Query.
 - **Text is text.** nexus-cli does not parse nexus; it just
-  shuttles bytes.
+  shuttles bytes between stdin/file and the socket.
+- **No handshake on this leg.** The CLI ↔ daemon leg has no
+  protocol-version negotiation. The daemon ↔ criome leg
+  carries the signal handshake; that's the daemon's
+  responsibility.
 
 ## Code map
 
-(All `todo!()` skeleton at present.)
+```
+src/
+├── main.rs    — CLI entry: argument parsing, UDS connect, byte shuttle
+└── error.rs   — error type (I/O wrapper)
+```
 
-- `src/main.rs` — CLI entry, argument parsing, UDS connection.
-- `src/lib.rs` — re-exports for embedding.
+(`main.rs` is currently a stub returning `Ok(())`; body lands
+alongside the M0 daemon body — see
+[mentci/reports/089](https://github.com/LiGoldragon/mentci/blob/main/reports/089-m0-implementation-plan-step-3-onwards.md).)
 
 ## Cross-cutting context
 
-- nexus language: [github.com/LiGoldragon/nexus](https://github.com/LiGoldragon/nexus)
-- client-msg envelope (the wire format to nexus):
-  [nexus::client_msg](https://github.com/LiGoldragon/nexus/tree/main/src/client_msg)
+- nexus grammar:
+  [nexus/spec/grammar.md](https://github.com/LiGoldragon/nexus/blob/main/spec/grammar.md)
+- nexus daemon (the other end of this socket):
+  [nexus/ARCHITECTURE.md](https://github.com/LiGoldragon/nexus/blob/main/ARCHITECTURE.md)
 - Project-wide architecture:
   [criome/ARCHITECTURE.md](https://github.com/LiGoldragon/criome/blob/main/ARCHITECTURE.md)
 
 ## Status
 
-**Skeleton-as-design.** Body fills land alongside criome
-scaffolding.
+**Skeleton.** Body lands alongside the M0 nexus daemon body.

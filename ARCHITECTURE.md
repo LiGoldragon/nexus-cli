@@ -100,9 +100,8 @@ src/
 └── error.rs   — error type (I/O wrapper)
 ```
 
-(`main.rs` is currently a stub returning `Ok(())`; body lands
-alongside the M0 daemon body — see
-[mentci/reports/089](https://github.com/LiGoldragon/mentci/blob/main/reports/089-m0-implementation-plan-step-3-onwards.md).)
+(`main.rs` is the byte shuttle: read stdin or file → connect to
+UDS → write text → read reply → write stdout.)
 
 ## Cross-cutting context
 
@@ -115,4 +114,5 @@ alongside the M0 daemon body — see
 
 ## Status
 
-**Skeleton.** Body lands alongside the M0 nexus daemon body.
+**M0 working.** Shuttle implemented and verified end-to-end via
+mentci-integration through both `criome-daemon` and `nexus-daemon`.

@@ -1,6 +1,6 @@
 # nexus-cli
 
-Thin CLI client for the [nexus](https://github.com/LiGoldragon/nexus)
+Thin CLI client for the nexus
 daemon. Binary name: `nexus`.
 
 ## License

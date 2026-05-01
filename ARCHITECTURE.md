@@ -1,6 +1,6 @@
 # ARCHITECTURE — nexus-cli
 
-The thin text client for the [nexus](https://github.com/LiGoldragon/nexus)
+The thin text client for the nexus
 daemon. Reads nexus text from stdin or a file, writes it to the
 daemon over UDS at `/tmp/nexus.sock`, prints the daemon's reply
 text. Stateless — the daemon (and ultimately criome) holds all
@@ -28,9 +28,9 @@ Owns:
 Does not own:
 
 - Parsing nexus text. The daemon does that, via
-  [nota-codec](https://github.com/LiGoldragon/nota-codec)'s
+  nota-codec's
   `Decoder::nexus` plus the per-kind
-  [nota-derive](https://github.com/LiGoldragon/nota-derive)
+  nota-derive
   derives (`NotaRecord` / `NotaEnum` / `NotaTransparent` /
   `NotaTryTransparent` / `NexusPattern` / `NexusVerb`).
 - Validation. criome does that.
@@ -41,7 +41,7 @@ Does not own:
 
 ## Edit surface
 
-Per the [nexus grammar](https://github.com/LiGoldragon/nexus/blob/main/spec/grammar.md),
+Per the nexus grammar,
 the verbs the daemon accepts (and therefore the CLI can shuttle)
 are:
 
@@ -63,7 +63,7 @@ MutateOp per match inside an AtomicBatch.
 ## Diagnostics as iteration substrate
 
 When validation fails, criome returns an `OutcomeMessage::
-Diagnostic(Diagnostic)` (per [signal/src/reply.rs](https://github.com/LiGoldragon/signal/blob/main/src/reply.rs))
+Diagnostic(Diagnostic)` (per signal/src/reply.rs)
 which the daemon renders as a `(Diagnostic …)` record in the
 reply text. The Diagnostic carries:
 
@@ -106,11 +106,11 @@ UDS → write text → read reply → write stdout.)
 ## Cross-cutting context
 
 - nexus grammar:
-  [nexus/spec/grammar.md](https://github.com/LiGoldragon/nexus/blob/main/spec/grammar.md)
+  nexus/spec/grammar.md
 - nexus daemon (the other end of this socket):
-  [nexus/ARCHITECTURE.md](https://github.com/LiGoldragon/nexus/blob/main/ARCHITECTURE.md)
+  nexus/ARCHITECTURE.md
 - Project-wide architecture:
-  [criome/ARCHITECTURE.md](https://github.com/LiGoldragon/criome/blob/main/ARCHITECTURE.md)
+  criome/ARCHITECTURE.md
 
 ## Status
 

@@ -10,4 +10,4 @@ The **thin text shuttle CLI** for the nexus daemon. Reads nexus text from stdin 
 
 ## Carve-outs worth knowing
 
-- This crate is **stateless by design**. Each invocation opens a new connection, writes, half-closes, reads the reply, exits. Don't add caching, retries, or fallback files — durable state lives in criome.
+- This crate is **stateless by design**. Each invocation opens a new connection, writes, half-closes, reads the reply, exits. Durable state lives in criome.

@@ -1,9 +1,13 @@
-# Agent instructions
+# Agent instructions — nexus-cli
 
-Repo role: the **thin text shuttle CLI** for the nexus daemon. Reads nexus text from stdin or a file, writes it to `/tmp/nexus.sock`, prints the reply.
+You **MUST** read AGENTS.md at `github:ligoldragon/lore` — the workspace contract.
 
-Read [ARCHITECTURE.md](ARCHITECTURE.md) for boundaries.
+## Repo role
 
-Workspace conventions live in [mentci/AGENTS.md](https://github.com/LiGoldragon/mentci/blob/main/AGENTS.md) — beauty, methods on types, full-English naming, S-expression commit messages, jj + always-push.
+The **thin text shuttle CLI** for the nexus daemon. Reads nexus text from stdin or a file, writes it to `/tmp/nexus.sock`, prints the reply.
 
-This crate is **stateless by design**. Each invocation opens a new connection, writes, half-closes, reads the reply, exits. Don't add caching, retries, or fallback files — durable state lives in criome.
+---
+
+## Carve-outs worth knowing
+
+- This crate is **stateless by design**. Each invocation opens a new connection, writes, half-closes, reads the reply, exits. Don't add caching, retries, or fallback files — durable state lives in criome.
